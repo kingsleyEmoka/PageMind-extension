@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PageMind</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+
+  <!-- ── Header ── -->
+  <header class="header">
+    <div class="logo">
+      <div class="logo-mark">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <circle cx="11" cy="11" r="10" stroke="var(--accent)" stroke-width="1.5"/>
+          <path d="M6 11h10M11 6l5 5-5 5" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span class="logo-text">PageMind</span>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="btn-settings" aria-label="Settings" title="Settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ── Page Info ── -->
+  <div class="page-info" id="page-info">
+    <div class="page-favicon" id="page-favicon"></div>
+    <span class="page-title" id="page-title">Loading…</span>
+  </div>
+
+  <!-- ── Mode Selector ── -->
+  <div class="mode-bar" role="group" aria-label="Summary mode">
+    <button class="mode-btn active" data-mode="full" aria-pressed="true">Full</button>
+    <button class="mode-btn" data-mode="brief" aria-pressed="false">Brief</button>
+    <button class="mode-btn" data-mode="insights" aria-pressed="false">Insights</button>
+  </div>
+
+  <!-- ── Main Content ── -->
+  <main class="main">
+
+    <!-- Idle State -->
+    <div class="state" id="state-idle">
+      <div class="idle-art">
+        <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+          <rect x="8" y="12" width="48" height="6" rx="3" fill="var(--surface-2)"/>
+          <rect x="8" y="24" width="36" height="4" rx="2" fill="var(--surface-2)"/>
+          <rect x="8" y="34" width="42" height="4" rx="2" fill="var(--surface-2)"/>
+          <rect x="8" y="44" width="28" height="4" rx="2" fill="var(--surface-2)"/>
+          <circle cx="52" cy="48" r="10" fill="var(--accent)" opacity="0.15"/>
+          <path d="M47 48h10M52 43v10" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <p class="idle-hint">Summarise this page with AI</p>
+      <button class="btn-primary" id="btn-summarise">
+        <span>Summarise Page</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Loading State -->
+    <div class="state hidden" id="state-loading">
+      <div class="spinner-wrap">
+        <div class="spinner"></div>
+        <div class="spinner-ring"></div>
+      </div>
+      <p class="loading-label" id="loading-label">Extracting content…</p>
+    </div>
+
+    <!-- Error State -->
+    <div class="state hidden" id="state-error">
+      <div class="error-icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--error)" stroke-width="2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <p class="error-msg" id="error-msg">Something went wrong.</p>
+      <button class="btn-secondary" id="btn-retry">Try Again</button>
+    </div>
+
+    <!-- Result State -->
+    <div class="state hidden" id="state-result">
+
+      <!-- Meta bar -->
+      <div class="meta-bar">
+        <span class="meta-chip" id="meta-reading">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span id="meta-reading-val">—</span>
+        </span>
+        <span class="meta-chip" id="meta-words">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+          <span id="meta-words-val">—</span>
+        </span>
+        <span class="meta-chip sentiment" id="meta-sentiment">—</span>
+        <span class="cache-badge hidden" id="cache-badge">cached</span>
+      </div>
+
+      <!-- Tags -->
+      <div class="tags" id="tags-container"></div>
+
+      <!-- Summary -->
+      <section class="section" id="section-summary">
+        <h3 class="section-title">Summary</h3>
+        <ul class="bullet-list" id="summary-list"></ul>
+      </section>
+
+      <!-- Key Insights -->
+      <section class="section" id="section-insights">
+        <h3 class="section-title">Key Insights</h3>
+        <ul class="insight-list" id="insights-list"></ul>
+      </section>
+
+      <!-- Actions -->
+      <div class="action-bar">
+        <button class="btn-icon-label" id="btn-highlight" title="Highlight key phrases on page">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          Highlight
+        </button>
+        <button class="btn-icon-label" id="btn-copy" title="Copy summary to clipboard">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copy
+        </button>
+        <button class="btn-icon-label" id="btn-refresh" title="Re-summarise (ignores cache)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+          Refresh
+        </button>
+        <button class="btn-icon-label danger" id="btn-clear" title="Clear result">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+          Clear
+        </button>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ── Settings Panel ── -->
+  <div class="panel hidden" id="panel-settings" role="dialog" aria-label="Settings">
+    <div class="panel-header">
+      <h2 class="panel-title">Settings</h2>
+      <button class="icon-btn" id="btn-close-settings" aria-label="Close settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="panel-body">
+      <label class="field-label" for="input-api-key">OpenRouter API Key</label>
+      <div class="input-wrap">
+        <input type="password" id="input-api-key" class="input" placeholder="sk-or-…" autocomplete="off" spellcheck="false" />
+        <button class="toggle-vis" id="btn-toggle-key" aria-label="Show/hide API key">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="icon-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+      <p class="field-hint">Your key is stored locally and never leaves your browser.</p>
+
+      <label class="field-label" for="select-theme">Theme</label>
+      <select id="select-theme" class="input select">
+        <option value="dark">Dark</option>
+        <option value="light">Light</option>
+      </select>
+
+      <div class="panel-actions">
+        <button class="btn-primary full" id="btn-save-settings">Save Settings</button>
+        <button class="btn-secondary full danger-border" id="btn-clear-cache">Clear All Cache</button>
+      </div>
+
+      <p class="settings-note">PageMind uses Gemini 1.5 Flash — free tier, fast, no credit card needed. Get your key at <strong>openrouter.ai/</strong></p>
+    </div>
+  </div>
+
+  <script src="src/popup.js"></script>
+</body>
+</html>
